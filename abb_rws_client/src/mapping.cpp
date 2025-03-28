@@ -355,6 +355,33 @@ rws::RWSStateMachineInterface::EGMSettings map(const abb_rapid_sm_addin_msgs::ms
   return rws_egm_settings;
 }
 
+
+rws::RWSStateMachineInterface::SGSettings map(const abb_rapid_sm_addin_msgs::msg::SGSettings& ros_sg_settings)
+{
+  rws::RWSStateMachineInterface::SGSettings rws_sg_settings;
+
+  rws_sg_settings.max_speed = ros_sg_settings.max_speed;
+  rws_sg_settings.hold_force = ros_sg_settings.hold_force;
+  rws_sg_settings.physical_limit= ros_sg_settings.physical_limit;
+
+  return rws_sg_settings;
+}
+
+
+abb_rapid_sm_addin_msgs::msg::SGSettings map(const rws::RWSStateMachineInterface::SGSettings& rws_sg_settings)
+{
+  abb_rapid_sm_addin_msgs::msg::SGSettings ros_sg_settings;
+
+  ros_sg_settings.max_speed= rws_sg_settings.max_speed.value;
+  ros_sg_settings.hold_force= rws_sg_settings.hold_force.value;
+  ros_sg_settings.physical_limit= rws_sg_settings.physical_limit.value;
+
+  return ros_sg_settings;
+}
+
+
+
+
 uint8_t map(egm::wrapper::Status::EGMState state)
 {
   switch (state)

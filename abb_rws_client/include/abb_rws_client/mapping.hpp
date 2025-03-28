@@ -48,6 +48,7 @@
 #include <abb_rapid_msgs/msg/tool_data.hpp>
 #include <abb_rapid_msgs/msg/w_obj_data.hpp>
 #include <abb_rapid_sm_addin_msgs/msg/egm_settings.hpp>
+#include <abb_rapid_sm_addin_msgs/msg/sg_settings.hpp>
 
 namespace abb
 {
@@ -247,6 +248,13 @@ uint8_t map(const egm::wrapper::Status::MotorState state);
  * \return uint8_t containing the mapped state.
  */
 uint8_t map(const egm::wrapper::Status::RAPIDExecutionState rapid_execution_state);
+
+
+rws::RWSStateMachineInterface::SGSettings map(const abb_rapid_sm_addin_msgs::msg::SGSettings& ros_sg_settings);
+
+
+abb_rapid_sm_addin_msgs::msg::SGSettings map(const rws::RWSStateMachineInterface::SGSettings& rws_sg_settings);
+
 
 /**
  * \brief Maps a vector to a string (e.g. for logging).

@@ -55,6 +55,8 @@
 #include <abb_rapid_sm_addin_msgs/srv/set_egm_settings.hpp>
 #include <abb_rapid_sm_addin_msgs/srv/set_rapid_routine.hpp>
 #include <abb_rapid_sm_addin_msgs/srv/set_sg_command.hpp>
+#include <abb_rapid_sm_addin_msgs/srv/get_sg_settings.hpp>
+#include <abb_rapid_sm_addin_msgs/srv/set_sg_settings.hpp>
 
 #include <abb_robot_msgs/srv/get_file_contents.hpp>
 #include <abb_robot_msgs/srv/get_io_signal.hpp>
@@ -250,6 +252,15 @@ private:
    */
   bool runSGRoutine(const abb_robot_msgs::srv::TriggerWithResultCode::Request::SharedPtr req,
                     abb_robot_msgs::srv::TriggerWithResultCode::Response::SharedPtr res);
+
+  
+  
+  bool getSGSettings(const abb_rapid_sm_addin_msgs::srv::GetSGSettings::Request::SharedPtr req,
+                      abb_rapid_sm_addin_msgs::srv::GetSGSettings::Response::SharedPtr res);
+
+  bool setSGSettings(const abb_rapid_sm_addin_msgs::srv::SetSGSettings::Request::SharedPtr req,
+                      abb_rapid_sm_addin_msgs::srv::SetSGSettings::Response::SharedPtr res);
+
 
   /**
    * \brief Sets the contents of a file.

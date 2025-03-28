@@ -216,7 +216,7 @@ CallbackReturn ABBSystemHardware::on_activate(const rclcpp_lifecycle::State& /* 
 {
   size_t counter = 0;
   RCLCPP_INFO(LOGGER, "Connecting to robot...");
-  while (rclcpp::ok() && ++counter < NUM_CONNECTION_TRIES)
+  while (rclcpp::ok() && counter < NUM_CONNECTION_TRIES)
   {
     // Wait for a message on any of the configured EGM channels.
     if (egm_manager_->waitForMessage(500))
@@ -231,6 +231,7 @@ CallbackReturn ABBSystemHardware::on_activate(const rclcpp_lifecycle::State& /* 
       RCLCPP_ERROR(LOGGER, "Failed to connect to robot");
       return CallbackReturn::ERROR;
     }
+    counter++;
     rclcpp::sleep_for(500ms);
   }
 

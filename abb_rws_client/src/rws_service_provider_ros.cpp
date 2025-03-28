@@ -192,6 +192,13 @@ RWSServiceProviderROS::RWSServiceProviderROS(const rclcpp::Node::SharedPtr& node
       sm_services_.push_back(node_->create_service<abb_rapid_sm_addin_msgs::srv::SetSGCommand>(
           "~/set_sg_command",
           std::bind(&RWSServiceProviderROS::setSGCommand, this, std::placeholders::_1, std::placeholders::_2)));
+    
+          sm_services_.push_back(node_->create_service<abb_rapid_sm_addin_msgs::srv::GetSGSettings>(
+          "~/get_sg_settings",
+          std::bind(&RWSServiceProviderROS::getSGSettings, this, std::placeholders::_1, std::placeholders::_2)));
+      sm_services_.push_back(node_->create_service<abb_rapid_sm_addin_msgs::srv::SetSGSettings>(
+          "~/set_sg_settings",
+          std::bind(&RWSServiceProviderROS::setSGSettings, this, std::placeholders::_1, std::placeholders::_2)));
     }
   }
   RCLCPP_INFO(node_->get_logger(), "RWS client services initialized!");
@@ -893,6 +900,86 @@ bool RWSServiceProviderROS::getEGMSettings(const abb_rapid_sm_addin_msgs::srv::G
   return true;
 }
 
+bool RWSServiceProviderROS::setSGSettings(const abb_rapid_sm_addin_msgs::srv::SetSGSettings::Request::SharedPtr req,
+                                           abb_rapid_sm_addin_msgs::srv::SetSGSettings::Response::SharedPtr res)
+{
+  if (!verifyAutoMode(res->result_code, res->message))
+  {
+    return true;
+  }
+  if (!verifyRAPIDRunning(res->result_code, res->message))
+  {
+    return true;
+  }
+  if (!verifySMAddinRuntimeStates(res->result_code, res->message))
+  {
+    return true;
+  }
+  if (!verifyRWSManagerReady(res->result_code, res->message))
+  {
+    return true;
+  }
+
+  rws_manager_.runService([&](abb::rws::RWSStateMachineInterface& interface) {
+    abb::rws::RWSStateMachineInterface::SGSettings settings = abb::robot::utilities::map(req->settings);
+
+    bool succ = req->gripper ==  abb_rapid_sm_addin_msgs::srv::GetSGSettings::Request::LEFT ? interface.services().sg().leftSetSettings(settings) : interface.services().sg().rightSetSettings(settings);
+
+    if (succ)
+    {
+      res->result_code = abb_robot_msgs::msg::ServiceResponses::RC_SUCCESS;
+    }
+    else
+    {
+      res->message = abb_robot_msgs::msg::ServiceResponses::FAILED;
+      res->result_code = abb_robot_msgs::msg::ServiceResponses::RC_FAILED;
+      RCLCPP_DEBUG_STREAM(node_->get_logger(), interface.getLogTextLatestEvent());
+    }
+  });
+
+  return true;
+}
+
+
+bool RWSServiceProviderROS::getSGSettings(const abb_rapid_sm_addin_msgs::srv::GetSGSettings::Request::SharedPtr req,
+                                           abb_rapid_sm_addin_msgs::srv::GetSGSettings::Response::SharedPtr res)
+{
+  if (!verifyAutoMode(res->result_code, res->message))
+  {
+    return true;
+  }
+  if (!verifyRAPIDRunning(res->result_code, res->message))
+  {
+    return true;
+  }
+  if (!verifySMAddinRuntimeStates(res->result_code, res->message))
+  {
+    return true;
+  }
+  if (!verifyRWSManagerReady(res->result_code, res->message))
+  {
+    return true;
+  }
+
+  rws_manager_.runService([&](abb::rws::RWSStateMachineInterface& interface) {
+    abb::rws::RWSStateMachineInterface::SGSettings settings;
+    bool succ = req->gripper ==  abb_rapid_sm_addin_msgs::srv::GetSGSettings::Request::LEFT ? interface.services().sg().leftGetSettings(&settings) : interface.services().sg().rightGetSettings(&settings);  
+    if (succ)
+    {
+      res->settings = abb::robot::utilities::map(settings);
+      res->result_code = abb_robot_msgs::msg::ServiceResponses::RC_SUCCESS;
+    }
+    else
+    {
+      res->message = abb_robot_msgs::msg::ServiceResponses::FAILED;
+      res->result_code = abb_robot_msgs::msg::ServiceResponses::RC_FAILED;
+      RCLCPP_DEBUG_STREAM(node_->get_logger(), interface.getLogTextLatestEvent());
+    }
+  });
+
+  return true;
+}
+
 bool RWSServiceProviderROS::setEGMSettings(const abb_rapid_sm_addin_msgs::srv::SetEGMSettings::Request::SharedPtr req,
                                            abb_rapid_sm_addin_msgs::srv::SetEGMSettings::Response::SharedPtr res)
 {
@@ -938,6 +1025,7 @@ bool RWSServiceProviderROS::setEGMSettings(const abb_rapid_sm_addin_msgs::srv::S
 
   return true;
 }
+
 
 bool RWSServiceProviderROS::runRAPIDRoutine(const abb_robot_msgs::srv::TriggerWithResultCode::Request::SharedPtr,
                                             abb_robot_msgs::srv::TriggerWithResultCode::Response::SharedPtr res)
